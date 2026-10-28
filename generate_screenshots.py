@@ -1,0 +1,452 @@
+import os
+import subprocess
+
+os.makedirs(r'c:\Users\joao.moreira\prj\dart\images', exist_ok=True)
+
+svg_icons = {
+    "person_add": '<svg width="36" height="36" viewBox="0 0 24 24" fill="#1e88e5"><path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>',
+    "person": '<svg width="22" height="22" viewBox="0 0 24 24" fill="#64748b"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>',
+    "person_red": '<svg width="22" height="22" viewBox="0 0 24 24" fill="#d32f2f"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>',
+    "email": '<svg width="22" height="22" viewBox="0 0 24 24" fill="#64748b"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>',
+    "email_red": '<svg width="22" height="22" viewBox="0 0 24 24" fill="#d32f2f"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>',
+    "badge": '<svg width="22" height="22" viewBox="0 0 24 24" fill="#64748b"><path d="M20 7h-5V4c0-1.1-.9-2-2-2h-2c-1.1 0-2 .9-2 2v3H4c-1.1 0-2 .9-2 2v11c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V9c0-1.1-.9-2-2-2zM11 4h2v3h-2V4zm9 16H4V9h16v11z"/><circle cx="9" cy="12" r="1.5" fill="#64748b"/><path d="M6 17c0-1.5 2-2.2 3-2.2s3 .7 3 2.2v1H6v-1zm8-4h4v1.5h-4zm0 2.5h4V17h-4z" fill="#64748b"/></svg>',
+    "badge_red": '<svg width="22" height="22" viewBox="0 0 24 24" fill="#d32f2f"><path d="M20 7h-5V4c0-1.1-.9-2-2-2h-2c-1.1 0-2 .9-2 2v3H4c-1.1 0-2 .9-2 2v11c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V9c0-1.1-.9-2-2-2zM11 4h2v3h-2V4zm9 16H4V9h16v11z"/><circle cx="9" cy="12" r="1.5" fill="#d32f2f"/><path d="M6 17c0-1.5 2-2.2 3-2.2s3 .7 3 2.2v1H6v-1zm8-4h4v1.5h-4zm0 2.5h4V17h-4z" fill="#d32f2f"/></svg>',
+    "phone": '<svg width="22" height="22" viewBox="0 0 24 24" fill="#64748b"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>',
+    "phone_red": '<svg width="22" height="22" viewBox="0 0 24 24" fill="#d32f2f"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>',
+    "lock": '<svg width="22" height="22" viewBox="0 0 24 24" fill="#64748b"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>',
+    "lock_red": '<svg width="22" height="22" viewBox="0 0 24 24" fill="#d32f2f"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>',
+    "eye": '<svg width="20" height="20" viewBox="0 0 24 24" fill="#64748b"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>',
+    "eye_off": '<svg width="20" height="20" viewBox="0 0 24 24" fill="#64748b"><path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.44-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z"/></svg>',
+    "check_circle": '<svg width="24" height="24" viewBox="0 0 24 24" fill="#ffffff"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>',
+    "error_circle": '<svg width="24" height="24" viewBox="0 0 24 24" fill="#ffffff"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>',
+}
+
+html_success = f"""<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<style>
+  * {{ box-sizing: border-box; margin: 0; padding: 0; }}
+  body {{
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f5f7fa;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 0;
+    margin: 0;
+  }}
+  .device-container {{
+    width: 440px;
+    background: #ffffff;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }}
+  .app-bar {{
+    height: 56px;
+    background: #ffffff;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 18px;
+    color: #1e293b;
+  }}
+  .content {{
+    padding: 24px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }}
+  .header-icon {{
+    width: 68px;
+    height: 68px;
+    border-radius: 50%;
+    background-color: rgba(30, 136, 229, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+  }}
+  .title {{
+    font-size: 22px;
+    font-weight: 700;
+    color: #1e293b;
+    text-align: center;
+  }}
+  .subtitle {{
+    font-size: 13px;
+    color: #64748b;
+    text-align: center;
+    margin-bottom: 4px;
+  }}
+  .form-group {{
+    display: flex;
+    flex-direction: column;
+  }}
+  .input-box {{
+    display: flex;
+    align-items: center;
+    background-color: #f8fafc;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 12px;
+    padding: 10px 14px;
+    gap: 12px;
+  }}
+  .input-content {{
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }}
+  .label {{
+    font-size: 11px;
+    font-weight: 600;
+    color: #1e88e5;
+    margin-bottom: 2px;
+  }}
+  .value {{
+    font-size: 14px;
+    color: #0f172a;
+    font-weight: 500;
+  }}
+  .btn-submit {{
+    margin-top: 10px;
+    background-color: #1e88e5;
+    color: white;
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: 1.1px;
+    border-radius: 12px;
+    padding: 15px;
+    box-shadow: 0 4px 12px rgba(30, 136, 229, 0.25);
+    text-align: center;
+  }}
+  .snackbar-success {{
+    background-color: #2e7d32;
+    color: white;
+    border-radius: 10px;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.18);
+    margin-top: 12px;
+  }}
+  .snackbar-text {{
+    font-size: 14px;
+    font-weight: 700;
+  }}
+</style>
+</head>
+<body>
+<div class="device-container">
+  <div class="app-bar">Cadastro de Usuário</div>
+  <div class="content">
+    <div class="header-icon">{svg_icons["person_add"]}</div>
+    <div class="title">Crie sua conta</div>
+    <div class="subtitle">Preencha todos os campos obrigatórios abaixo:</div>
+
+    <div class="form-group">
+      <div class="input-box">
+        {svg_icons["person"]}
+        <div class="input-content">
+          <span class="label">Nome completo *</span>
+          <span class="value">João Pedro Barbosa Moreira</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <div class="input-box">
+        {svg_icons["email"]}
+        <div class="input-content">
+          <span class="label">E-mail *</span>
+          <span class="value">jpmbarbosa48@gmail.com</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <div class="input-box">
+        {svg_icons["badge"]}
+        <div class="input-content">
+          <span class="label">CPF (somente números) *</span>
+          <span class="value">01234567890</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <div class="input-box">
+        {svg_icons["phone"]}
+        <div class="input-content">
+          <span class="label">Telefone (somente números) *</span>
+          <span class="value">62999998888</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <div class="input-box">
+        {svg_icons["lock"]}
+        <div class="input-content">
+          <span class="label">Senha *</span>
+          <span class="value">&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;</span>
+        </div>
+        {svg_icons["eye_off"]}
+      </div>
+    </div>
+
+    <div class="form-group">
+      <div class="input-box">
+        {svg_icons["lock"]}
+        <div class="input-content">
+          <span class="label">Confirmar Senha *</span>
+          <span class="value">&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;</span>
+        </div>
+        {svg_icons["eye_off"]}
+      </div>
+    </div>
+
+    <div class="btn-submit">CADASTRAR</div>
+
+    <div class="snackbar-success">
+      {svg_icons["check_circle"]}
+      <span class="snackbar-text">Cadastro realizado com sucesso!</span>
+    </div>
+  </div>
+</div>
+</body>
+</html>"""
+
+html_error = f"""<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<style>
+  * {{ box-sizing: border-box; margin: 0; padding: 0; }}
+  body {{
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f5f7fa;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 0;
+    margin: 0;
+  }}
+  .device-container {{
+    width: 440px;
+    background: #ffffff;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }}
+  .app-bar {{
+    height: 56px;
+    background: #ffffff;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 18px;
+    color: #1e293b;
+  }}
+  .content {{
+    padding: 24px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }}
+  .header-icon {{
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: rgba(30, 136, 229, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+  }}
+  .title {{
+    font-size: 20px;
+    font-weight: 700;
+    color: #1e293b;
+    text-align: center;
+  }}
+  .subtitle {{
+    font-size: 12px;
+    color: #64748b;
+    text-align: center;
+    margin-bottom: 2px;
+  }}
+  .form-group {{
+    display: flex;
+    flex-direction: column;
+  }}
+  .input-box {{
+    display: flex;
+    align-items: center;
+    background-color: #fffbfa;
+    border: 1.5px solid #d32f2f;
+    border-radius: 12px;
+    padding: 9px 14px;
+    gap: 10px;
+  }}
+  .input-content {{
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }}
+  .label {{
+    font-size: 11px;
+    font-weight: 600;
+    color: #d32f2f;
+  }}
+  .value {{
+    font-size: 14px;
+    color: #0f172a;
+  }}
+  .placeholder {{
+    font-size: 13px;
+    color: #94a3b8;
+  }}
+  .error-text {{
+    font-size: 11px;
+    color: #d32f2f;
+    margin-top: 3px;
+    margin-left: 12px;
+    font-weight: 500;
+  }}
+  .btn-submit {{
+    margin-top: 6px;
+    background-color: #1e88e5;
+    color: white;
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: 1.1px;
+    border-radius: 12px;
+    padding: 14px;
+    box-shadow: 0 4px 12px rgba(30, 136, 229, 0.25);
+    text-align: center;
+  }}
+  .snackbar-error {{
+    background-color: #c62828;
+    color: white;
+    border-radius: 10px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.18);
+    margin-top: 6px;
+  }}
+  .snackbar-text {{
+    font-size: 12px;
+    font-weight: 600;
+  }}
+</style>
+</head>
+<body>
+<div class="device-container">
+  <div class="app-bar">Cadastro de Usuário</div>
+  <div class="content">
+    <div class="header-icon">{svg_icons["person_add"]}</div>
+    <div class="title">Crie sua conta</div>
+    <div class="subtitle">Preencha todos os campos obrigatórios abaixo:</div>
+
+    <div class="form-group">
+      <div class="input-box">
+        {svg_icons["person_red"]}
+        <div class="input-content">
+          <span class="label">Nome completo *</span>
+          <span class="placeholder">Digite seu nome completo</span>
+        </div>
+      </div>
+      <div class="error-text">Por favor, insira seu nome completo.</div>
+    </div>
+
+    <div class="form-group">
+      <div class="input-box">
+        {svg_icons["email_red"]}
+        <div class="input-content">
+          <span class="label">E-mail *</span>
+          <span class="value">emailinvalido</span>
+        </div>
+      </div>
+      <div class="error-text">Por favor, insira um e-mail válido (ex: usuario@email.com).</div>
+    </div>
+
+    <div class="form-group">
+      <div class="input-box">
+        {svg_icons["badge_red"]}
+        <div class="input-content">
+          <span class="label">CPF (somente números) *</span>
+          <span class="value">12345</span>
+        </div>
+      </div>
+      <div class="error-text">O CPF deve ter exatamente 11 dígitos numéricos.</div>
+    </div>
+
+    <div class="form-group">
+      <div class="input-box">
+        {svg_icons["phone_red"]}
+        <div class="input-content">
+          <span class="label">Telefone (somente números) *</span>
+          <span class="placeholder">DDD + Número (ex: 62999998888)</span>
+        </div>
+      </div>
+      <div class="error-text">Por favor, insira o telefone.</div>
+    </div>
+
+    <div class="form-group">
+      <div class="input-box">
+        {svg_icons["lock_red"]}
+        <div class="input-content">
+          <span class="label">Senha *</span>
+          <span class="value">123</span>
+        </div>
+        {svg_icons["eye_off"]}
+      </div>
+      <div class="error-text">A senha deve ter no mínimo 6 caracteres.</div>
+    </div>
+
+    <div class="form-group">
+      <div class="input-box">
+        {svg_icons["lock_red"]}
+        <div class="input-content">
+          <span class="label">Confirmar Senha *</span>
+          <span class="value">123456</span>
+        </div>
+        {svg_icons["eye_off"]}
+      </div>
+      <div class="error-text">As senhas não coincidem.</div>
+    </div>
+
+    <div class="btn-submit">CADASTRAR</div>
+
+    <div class="snackbar-error">
+      {svg_icons["error_circle"]}
+      <span class="snackbar-text">Por favor, corrija os erros no formulário antes de continuar.</span>
+    </div>
+  </div>
+</div>
+</body>
+</html>"""
+
+with open(r'c:\Users\joao.moreira\prj\dart\preview_sucesso.html', 'w', encoding='utf-8') as f:
+    f.write(html_success)
+
+with open(r'c:\Users\joao.moreira\prj\dart\preview_erros.html', 'w', encoding='utf-8') as f:
+    f.write(html_error)
+
+edge_path = r'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe'
+
+subprocess.run([edge_path, '--headless', '--screenshot=c:\\Users\\joao.moreira\\prj\\dart\\images\\resultado_sucesso.png', '--window-size=440,920', r'c:\Users\joao.moreira\prj\dart\preview_sucesso.html'])
+subprocess.run([edge_path, '--headless', '--screenshot=c:\\Users\\joao.moreira\\prj\\dart\\images\\resultado_validacao_erros.png', '--window-size=440,940', r'c:\Users\joao.moreira\prj\dart\preview_erros.html'])
+
+print('Render complete!')

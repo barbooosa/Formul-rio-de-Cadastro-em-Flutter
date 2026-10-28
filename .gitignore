@@ -1,0 +1,8 @@
+# Created by .ignore support plugin (hsz.mxtr.koko)
+.dart_tool/
+.packages
+build/
+.pub/
+.idea/
+*.iml
+.vscode/
